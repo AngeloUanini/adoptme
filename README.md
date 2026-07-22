@@ -12,7 +12,7 @@ Este repositorio corresponde al entregable final del curso de Backend: incluye
 | Recurso | URL |
 |---|---|
 | Repositorio | `https://github.com/AngeloUanini/adoptme` |
-| Imagen en DockerHub | `https://hub.docker.com/r/AngeloUanini/adoptme` |
+| Imagen en DockerHub | `https://hub.docker.com/r/wizard382/adoptme` |
 | Documentación Swagger | `http://localhost:8080/api/docs` |
 
 ---
@@ -93,13 +93,13 @@ que se ejecutan de forma aislada y repetible.
 ### Construir la imagen
 
 ```bash
-docker build -t AngeloUanini/adoptme:1.0.0 .
+docker build -t wizard382/adoptme:1.0.0 .
 ```
 
 ### Ejecutar el contenedor
 
 ```bash
-docker run -d --name adoptme -p 8080:8080 --env-file .env AngeloUanini/adoptme:1.0.0
+docker run -d --name adoptme -p 8080:8080 --env-file .env wizard382/adoptme:1.0.0
 ```
 
 Verificación rápida:
@@ -122,16 +122,16 @@ docker run --rm -v "$PWD":/app -w /app node:20-alpine sh -c "npm install && npm 
 
 ```bash
 docker login
-docker tag AngeloUanini/adoptme:1.0.0 AngeloUanini/adoptme:latest
-docker push AngeloUanini/adoptme:1.0.0
-docker push AngeloUanini/adoptme:latest
+docker tag wizard382/adoptme:1.0.0 wizard382/adoptme:latest
+docker push wizard382/adoptme:1.0.0
+docker push wizard382/adoptme:latest
 ```
 
 ### Escaneo de seguridad
 
 ```bash
-docker scout quickview AngeloUanini/adoptme:1.0.0
-docker scout cves AngeloUanini/adoptme:1.0.0
+docker scout quickview wizard382/adoptme:1.0.0
+docker scout cves wizard382/adoptme:1.0.0
 ```
 
 ---

@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------
 # Etapa 1: instalacion de dependencias de produccion
 # ---------------------------------------------------------------------------
-FROM node:20-alpine AS deps
+FROM node:24-alpine AS deps
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 # ---------------------------------------------------------------------------
 # Etapa 2: imagen final de ejecucion
 # ---------------------------------------------------------------------------
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 
 ENV NODE_ENV=production
 ENV PORT=8080
