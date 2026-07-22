@@ -11,9 +11,11 @@ Este repositorio corresponde al entregable final del curso de Backend: incluye
 
 | Recurso | URL |
 |---|---|
-| Repositorio | `https://github.com/AngeloUanini/adoptme` |
-| Imagen en DockerHub | `https://hub.docker.com/r/wizard382/adoptme` |
-| Documentación Swagger | `http://localhost:8080/api/docs` |
+| Repositorio | https://github.com/AngeloUanini/adoptme |
+| Imagen en DockerHub | https://hub.docker.com/r/wizard382/adoptme |
+| Documentación Swagger | http://localhost:8080/api/docs (con el proyecto en ejecución) |
+
+Imagen pública: `wizard382/adoptme:1.1.0` (también disponible como `latest`).
 
 ---
 
@@ -84,7 +86,7 @@ npm test
 
 Los tests usan **Mocha + Chai + Supertest + Sinon**. No requieren base de datos:
 todas las dependencias externas están reemplazadas por *mocks* y *fakes*, por lo
-que se ejecutan de forma aislada y repetible.
+que se ejecutan de forma aislada y repetible. Resultado esperado: **15 passing**.
 
 ---
 
@@ -93,45 +95,62 @@ que se ejecutan de forma aislada y repetible.
 ### Construir la imagen
 
 ```bash
-docker build -t wizard382/adoptme:1.0.0 .
+docker build -t wizard382/adoptme:1.1.0 .
 ```
 
 ### Ejecutar el contenedor
 
+La aplicación necesita una base MongoDB. La forma más simple de levantar el
+entorno completo es con una red de Docker:
+
 ```bash
-docker run -d --name adoptme -p 8080:8080 --env-file .env wizard382/adoptme:1.0.0
+docker network create adoptme-net
+docker run -d --name mongo --network adoptme-net -p 27017:27017 mongo:7
+docker run -d --name adoptme --network adoptme-net -p 8080:8080 \
+  -e MONGO_URL=mongodb://mongo:27017/adoptme \
+  wizard382/adoptme:1.1.0
 ```
 
-Verificación rápida:
+Dentro de una red de Docker los contenedores se resuelven por nombre, por eso la
+URL usa `mongodb://mongo:27017` y no `localhost`.
+
+Verificación:
 
 ```bash
-curl http://localhost:8080/health
-# {"status":"ok"}
+docker ps                                  # STATUS debe indicar Up ... (healthy)
+docker logs adoptme                        # "Conectado a MongoDB"
+curl http://localhost:8080/health          # {"status":"ok"}
+curl http://localhost:8080/api/adoptions   # {"status":"success","payload":[]}
 ```
 
-### Correr los tests dentro del contenedor
-
-Como la imagen de producción no incluye devDependencies, los tests se corren
-sobre una imagen de desarrollo:
+### Usar la imagen publicada
 
 ```bash
-docker run --rm -v "$PWD":/app -w /app node:20-alpine sh -c "npm install && npm test"
+docker pull wizard382/adoptme:1.1.0
+```
+
+### Correr los tests dentro de un contenedor
+
+La imagen de producción no incluye devDependencies, por lo que los tests se
+ejecutan sobre una imagen de desarrollo:
+
+```bash
+docker run --rm -v "$PWD":/app -w /app node:24-alpine sh -c "npm install && npm test"
 ```
 
 ### Publicar en DockerHub
 
 ```bash
 docker login
-docker tag wizard382/adoptme:1.0.0 wizard382/adoptme:latest
-docker push wizard382/adoptme:1.0.0
+docker tag wizard382/adoptme:1.1.0 wizard382/adoptme:latest
+docker push wizard382/adoptme:1.1.0
 docker push wizard382/adoptme:latest
 ```
 
 ### Escaneo de seguridad
 
 ```bash
-docker scout quickview wizard382/adoptme:1.0.0
-docker scout cves wizard382/adoptme:1.0.0
+docker scout quickview wizard382/adoptme:1.1.0
 ```
 
 ---
@@ -140,16 +159,28 @@ docker scout cves wizard382/adoptme:1.0.0
 
 - **Build multi-stage**: las dependencias se resuelven en una etapa aparte y a la
   imagen final solo pasa lo necesario para ejecutar.
-- **Imagen base `node:20-alpine`**: alrededor de 50 MB frente a los ~1 GB de la
-  imagen `node` completa.
+- **Imagen base `node:24-alpine`**: la imagen resultante pesa ~66 MB de contenido
+  frente a más de 1 GB que ocuparía con la imagen `node` completa.
 - **Copia de `package*.json` antes del código**: aprovecha la caché de capas, de
   modo que un cambio en el código no reinstala dependencias.
 - **`npm ci --omit=dev`**: build reproducible a partir del lockfile y sin
   paquetes de testing en producción.
 - **Usuario sin privilegios (`appuser`)**: la aplicación no corre como root.
+  Docker Scout confirma esta práctica con la política *Default non-root user*.
 - **`.dockerignore`**: excluye `node_modules`, `.env`, tests y archivos de
   desarrollo del contexto de build.
 - **`HEALTHCHECK`**: Docker monitorea el endpoint `/health` del contenedor.
+
+### Remediación de vulnerabilidades
+
+El escaneo con Docker Scout sobre la versión 1.0.0 (base `node:20-alpine`)
+reportó vulnerabilidades heredadas de la imagen base. Se actualizó la base a
+`node:24-alpine` y se publicó la versión 1.1.0:
+
+| Versión | Imagen base | Críticas | Altas | Medias | Bajas |
+|---|---|---|---|---|---|
+| 1.0.0 | `node:20-alpine` | 2 | 22 | 11 | 4 |
+| 1.1.0 | `node:24-alpine` | 1 | 3 | 4 | 2 |
 
 ---
 
@@ -177,11 +208,11 @@ docker scout cves wizard382/adoptme:1.0.0
     Rutas no definidas en el router
       ✔ debe responder 404 ante un metodo no soportado sobre /api/adoptions
 
-  15 passing (110ms)
+  15 passing (163ms)
 ```
 
 ---
 
 ## Stack
 
-Node.js 20 · Express 4 · MongoDB / Mongoose 8 · Mocha · Chai · Supertest · Sinon · Swagger · Docker
+Node.js 24 · Express 4 · MongoDB / Mongoose 8 · Mocha · Chai · Supertest · Sinon · Swagger · Docker
