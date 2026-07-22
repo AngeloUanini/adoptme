@@ -11,8 +11,8 @@ Este repositorio corresponde al entregable final del curso de Backend: incluye
 
 | Recurso | URL |
 |---|---|
-| Repositorio | `https://github.com/USUARIO/adoptme` |
-| Imagen en DockerHub | `https://hub.docker.com/r/USUARIO/adoptme` |
+| Repositorio | `https://github.com/AngeloUanini/adoptme` |
+| Imagen en DockerHub | `https://hub.docker.com/r/AngeloUanini/adoptme` |
 | Documentación Swagger | `http://localhost:8080/api/docs` |
 
 ---
@@ -65,7 +65,7 @@ Códigos de respuesta: `200` éxito · `400` id inválido o mascota ya adoptada 
 ## Instalación local
 
 ```bash
-git clone https://github.com/USUARIO/adoptme.git
+git clone https://github.com/AngeloUanini/adoptme.git
 cd adoptme
 npm install
 cp .env.example .env    # completar MONGO_URL y JWT_SECRET
@@ -93,13 +93,13 @@ que se ejecutan de forma aislada y repetible.
 ### Construir la imagen
 
 ```bash
-docker build -t USUARIO/adoptme:1.0.0 .
+docker build -t AngeloUanini/adoptme:1.0.0 .
 ```
 
 ### Ejecutar el contenedor
 
 ```bash
-docker run -d --name adoptme -p 8080:8080 --env-file .env USUARIO/adoptme:1.0.0
+docker run -d --name adoptme -p 8080:8080 --env-file .env AngeloUanini/adoptme:1.0.0
 ```
 
 Verificación rápida:
@@ -122,16 +122,16 @@ docker run --rm -v "$PWD":/app -w /app node:20-alpine sh -c "npm install && npm 
 
 ```bash
 docker login
-docker tag USUARIO/adoptme:1.0.0 USUARIO/adoptme:latest
-docker push USUARIO/adoptme:1.0.0
-docker push USUARIO/adoptme:latest
+docker tag AngeloUanini/adoptme:1.0.0 AngeloUanini/adoptme:latest
+docker push AngeloUanini/adoptme:1.0.0
+docker push AngeloUanini/adoptme:latest
 ```
 
 ### Escaneo de seguridad
 
 ```bash
-docker scout quickview USUARIO/adoptme:1.0.0
-docker scout cves USUARIO/adoptme:1.0.0
+docker scout quickview AngeloUanini/adoptme:1.0.0
+docker scout cves AngeloUanini/adoptme:1.0.0
 ```
 
 ---
